@@ -1,0 +1,70 @@
+###
+##{{ ansible_managed }}
+###
+
+{% if ansible_distribution == "Debian" %}
+Unattended-Upgrade::Origins-Pattern {
+        "origin=Debian,codename=${distro_codename},label=Debian";
+        "origin=Debian,codename=${distro_codename},label=Debian-Security";
+{% if auto_updates_policy == "updates" %}
+        "origin=Debian,codename=${distro_codename}-updates";
+{% endif %}
+};
+{% else %}
+Unattended-Upgrade::Allowed-Origins {
+        "${distro_id}:${distro_codename}-security";
+{% if auto_updates_policy == "updates" %}
+        "${distro_id}:${distro_codename}-updates";
+{% endif %}
+};
+{% endif %}
+
+{% if auto_updates_blacklisted_packages|length > 0 %}
+Unattended-Upgrade::Package-Blacklist {
+{% for packages in auto_updates_blacklisted_packages %}
+	"{{ packages }}"; {% raw %}
+{% endraw %}
+{% endfor %}
+};
+{% endif %}
+
+Unattended-Upgrade::Mail "{{ auto_updates_mail }}";
+Unattended-Upgrade::MailOnlyOnError "false";
+Unattended-Upgrade::Remove-Unused-Dependencies "false";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Automatic-Reboot "false";
+
+// This option allows you to control if on a unclean dpkg exit
+// unattended-upgrades will automatically run 
+//   dpkg --force-confold --configure -a
+// The default is true, to ensure updates keep getting installed
+//Unattended-Upgrade::AutoFixInterruptedDpkg "false";
+
+// Split the upgrade into the smallest possible chunks so that
+// they can be interrupted with SIGUSR1. This makes the upgrade
+// a bit slower but it has the benefit that shutdown while a upgrade
+// is running is possible (with a small delay)
+//Unattended-Upgrade::MinimalSteps "true";
+
+// Install all unattended-upgrades when the machine is shuting down
+// instead of doing it in the background while the machine is running
+// This will (obviously) make shutdown slower
+//Unattended-Upgrade::InstallOnShutdown "true";
+
+// Automatically reboot even if there are users currently logged in.
+//Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
+
+// If automatic reboot is enabled and needed, reboot at the specific
+// time instead of immediately
+// Default: "now"
+//Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+
+// Use apt bandwidth limit feature, this example limits the download
+// speed to 70kb/sec
+//Acquire::http::Dl-Limit "70";
+
+// Enable logging to syslog. Default is False
+//Unattended-Upgrade::SyslogEnable "false";
+
+// Specify syslog facility. Default is daemon
+//Unattended-Upgrade::SyslogFacility "daemon";

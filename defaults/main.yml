@@ -1,0 +1,15 @@
+---
+
+auto_updates_mail: root
+
+auto_updates_blacklisted_packages: []
+
+auto_updates_upgrade_frequency: "monthly"
+
+auto_updates_start_upgrade_time: "09:00:00"
+auto_updates_random_upgrade_time: 180
+
+auto_updates_start_update_time: "08:00:00"
+auto_updates_random_update_time: 50
+
+auto_updates_policy: security

@@ -1,0 +1,91 @@
+---
+
+- name: deploy needy-restart script
+  copy:
+    src: needy-restart
+    dest: /usr/local/bin/needy-restart
+    mode: '755'
+
+## CentOS 6 ##
+- name: deploy yum-cron configuration
+  template:
+    dest: /etc/sysconfig/yum-cron
+    src: ./templates/sysconfig/yum-cron.j2
+    force: yes
+  notify:
+    - "restart yum-cron service"
+  when: "ansible_distribution_major_version == '6'"
+
+## CentOS 7 ##
+- name: "deploy yum-cron configuration"
+  template:
+    dest: /etc/yum/{{ item }}.conf
+    src: ./templates/yum/{{ item }}.conf.j2
+    force: yes
+  loop:
+    - yum-cron
+    - yum-cron-hourly
+  notify:
+    - "restart yum-cron service"
+  when: "ansible_distribution_major_version == '7'"
+
+# Tricks to set start time on CentOS 6 and CentOS7
+- block:
+    - name: check if yum-cron script exist
+      stat:
+        path: /usr/local/bin/yum-cron
+      register: script_path
+
+    - name: copy script for auto updates
+      copy:
+        src: "{{ auto_updates_cron_path }}"
+        dest: "/usr/local/bin/yum-cron"
+        mode: +x
+        remote_src: yes
+      when: not script_path.stat.exists
+
+    - name: add exit 0 in basic cron
+      copy:
+        content: |
+          #!/bin/bash
+          exit 0
+        dest: "{{ auto_updates_cron_path }}"
+
+    - name: create custom cron
+      include: create_cron.yml
+
+  when: "ansible_distribution_major_version < '8'"
+
+## CentOS 8 ##
+- block:
+    - name: deploy dnf-automatic configuration
+      template:
+        dest: /etc/dnf/automatic.conf
+        src: ./templates/dnf/automatic.conf.j2
+        force: yes
+
+    - name: create needed directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - /etc/systemd/system/dnf-automatic.timer.d/
+        - /etc/systemd/system/dnf-automatic.service.d/
+
+    - name: deploy dnf timer
+      template:
+        src: ./templates/dnf/timer_systemd.j2
+        dest: /etc/systemd/system/dnf-automatic.timer.d/override.conf
+        force: yes
+      notify:
+        "restart dnf-automatic.timer service"
+
+    - name: deploy dnf service
+      copy:
+        src: dnf/service_systemd
+        dest: /etc/systemd/system/dnf-automatic.service.d/override.conf
+        force: yes
+      notify:
+        "reload daemon"
+  when: "ansible_distribution_major_version == '8'"

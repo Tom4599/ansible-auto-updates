@@ -1,0 +1,38 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+lint:
+  name: yamllint
+platforms:
+  - name: ubuntu1604
+    box: ubuntu/xenial64
+    groups:
+      - auto_updates_preprod
+  - name: ubuntu1804
+    box: ubuntu/bionic64
+    groups:
+      - auto_updates_prod
+  - name: ubuntu2004
+    box: ubuntu/focal64
+    groups:
+      - auto_updates_uat
+  - name: centos6
+    box: centos/6
+    groups:
+      - auto_updates_uat
+provisioner:
+  name: ansible
+  inventory:
+    links:
+      group_vars: inventory/group_vars/
+      host_vars: inventory/host_vars/
+scenario:
+  name: default
+verifier:
+  name: testinfra
+  lint:
+    name: flake8

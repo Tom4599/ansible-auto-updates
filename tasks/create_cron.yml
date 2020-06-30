@@ -1,0 +1,48 @@
+---
+
+# Monthly cron
+- name: create custom cron for monthly
+  cron:
+    name: yum-cron job for auto updates
+    cron_file: yum-cron
+    month: "*"
+    job: "[ $(date '+%d') -ge {{ auto_updates_cron_min_day }} ] && \
+       [ $(date '+%d') -le {{ auto_updates_cron_max_day }} ] && \
+       /usr/local/bin/yum-cron && /usr/local/bin/needy-restart"
+    user: root
+    # Split to get hour and min from var
+    minute: "{{ auto_updates_start_upgrade_time.split(':')[1] }}"
+    hour: "{{ auto_updates_start_upgrade_time.split(':')[0] }}"
+    state: present
+    weekday: "{{ auto_updates_cron_week_day }}"
+  when: "auto_updates_upgrade_frequency == 'monthly'"
+
+# Weekly cron
+- name: create custom cron for weekly
+  cron:
+    name: yum-cron job for auto updates
+    cron_file: yum-cron
+    month: "*"
+    job: "/usr/local/bin/yum-cron && /usr/local/bin/needy-restart"
+    user: root
+    # Split to get hour and min from var
+    minute: "{{ auto_updates_start_upgrade_time.split(':')[1] }}"
+    hour: "{{ auto_updates_start_upgrade_time.split(':')[0] }}"
+    state: present
+    weekday: "{{ auto_updates_cron_week_day }}"
+  when: "auto_updates_upgrade_frequency == 'weekly'"
+
+# Daily cron
+- name: create custom cron for daily
+  cron:
+    name: yum-cron job for auto updates
+    cron_file: yum-cron
+    month: "*"
+    job: "/usr/local/bin/yum-cron && /usr/local/bin/needy-restart"
+    user: root
+    # Split to get hour and min from var
+    minute: "{{ auto_updates_start_upgrade_time.split(':')[1] }}"
+    hour: "{{ auto_updates_start_upgrade_time.split(':')[0] }}"
+    state: present
+    weekday: "{{ auto_updates_cron_days_daily }}"
+  when: "auto_updates_upgrade_frequency == 'daily'"

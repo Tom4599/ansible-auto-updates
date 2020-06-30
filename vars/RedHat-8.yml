@@ -1,0 +1,6 @@
+---
+
+auto_updates_required_packages:
+  - dnf-automatic
+  - mailx
+  - lsof

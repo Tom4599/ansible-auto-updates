@@ -1,0 +1,27 @@
+###
+##{{ ansible_managed }}
+###
+
+[commands]
+{% if auto_updates_policy == "security" %}
+update_cmd = security
+{% else %}
+update_cmd = default
+{% endif %}
+update_messages = yes
+download_updates = yes
+apply_updates = yes
+random_sleep = {{ auto_updates_random_upgrade_time }}
+
+[emitters]
+emit_via = email
+
+[email]
+email_from = root@{{ ansible_hostname }}
+email_to = {{ auto_updates_mail }}
+email_host = localhost	
+
+[base]
+{% if auto_updates_blacklisted_packages|length > 0 %}
+exclude={{ auto_updates_blacklisted_packages|join(' ') }}
+{% endif %}

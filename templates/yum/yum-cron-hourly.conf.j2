@@ -1,0 +1,17 @@
+###
+##{{ ansible_managed }}
+###
+
+[commands]
+{% if auto_updates_policy == "security" %}
+update_cmd = security
+{% else %}
+update_cmd = default
+{% endif %}
+update_messages = no
+download_updates = yes
+apply_updates = no
+random_sleep = {{ auto_updates_random_update_time }}
+
+[emitters]
+emit_via =

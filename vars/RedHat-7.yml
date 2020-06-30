@@ -1,0 +1,7 @@
+---
+
+auto_updates_required_packages:
+  - yum-cron
+  - mailx
+
+auto_updates_cron_path: "/etc/cron.daily/0yum-daily.cron"

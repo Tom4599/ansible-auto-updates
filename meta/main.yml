@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: Tom Saunier
+  description: This role enable auto_updates on Debian-Like and CentOS
+  license: GPLv2
+  min_ansible_version: 2.7
+  platforms:
+    - name: ubuntu
+      versions:
+        - xenial
+        - bionic
+        - focal
+    - name: debian
+      versions:
+        - stretch
+        - buster
+    - name: el
+      versions:
+        - 6
+        - 7
+        - 8

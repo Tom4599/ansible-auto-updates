@@ -1,0 +1,16 @@
+###
+##{{ ansible_managed }}
+###
+
+{% if auto_updates_blacklisted_packages|length > 0 %}
+YUM_PARAMETER="-x {{ auto_updates_blacklisted_packages|join(' -x ')}}"
+{% endif %}
+CHECK_ONLY=no
+CHECK_FIRST=no
+DOWNLOAD_ONLY=no
+RANDOMWAIT="{{ auto_updates_random_upgrade_time }}"
+MAILTO={{ auto_updates_mail }}
+DAYS_OF_WEEK="1234" 
+CLEANDAY="0"
+SERVICE_WAITS=yes
+SERVICE_WAIT_TIME=300

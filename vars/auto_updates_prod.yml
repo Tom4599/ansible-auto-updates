@@ -1,0 +1,10 @@
+---
+
+## prod ##
+auto_updates_cron_min_day: 4
+auto_updates_cron_max_day: 10
+auto_updates_cron_week_day: 4
+auto_updates_cron_week_day_string: Thu
+auto_updates_cron_list_days: "4,5,6,7,8,9,10"
+auto_updates_cron_days_daily_string: "Mon,Tue,Wed,Thu"
+auto_updates_cron_days_daily: "1,2,3,4"

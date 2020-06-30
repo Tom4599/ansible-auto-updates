@@ -1,0 +1,28 @@
+---
+
+- name: init vars
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_os_family }}.yml'
+      paths: '../vars'
+
+- name: include env vars
+  include_vars: "{{ env }}.yml"
+  when: inventory_hostname in groups[env]
+  loop:
+    - auto_updates_preprod
+    - auto_updates_uat
+    - auto_updates_prod
+  loop_control:
+    loop_var: "env"
+
+- name: install required packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ auto_updates_required_packages }}"
+
+- name: configure auto update by OS
+  include: configure-{{ ansible_os_family }}.yml

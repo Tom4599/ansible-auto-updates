@@ -1,0 +1,10 @@
+---
+
+- hosts: all
+  vars:
+    mail: root
+    upgrade_frequency: 1
+    start_time: "09:00:00"
+    random_time: 180
+  roles:
+    - ../ansible-auto-updates

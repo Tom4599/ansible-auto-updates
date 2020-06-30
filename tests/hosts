@@ -1,0 +1,9 @@
+[auto_updates_preprod]
+debian10
+centos7
+
+[auto_updates_uat]
+ubuntu18
+
+[auto_updates_prod]
+centos8

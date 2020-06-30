@@ -1,0 +1,33 @@
+---
+
+- name: deploy unattended-upgrade configuration
+  template:
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    src: ./templates/apt.conf.d/50unattended-upgrades.j2
+    force: yes
+
+- name: deploy auto-upgrade configuration
+  template:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    src: ./templates/apt.conf.d/20auto-upgrades.j2
+    force: yes
+
+- name: create /etc/systemd/system/apt-* directory
+  file:
+    path: /etc/systemd/system/{{ item }}.d/
+    state: directory
+    mode: '0755'
+  loop:
+    - apt-daily.timer
+    - apt-daily-upgrade.timer
+
+- name: deploy file to set execution time
+  template:
+    dest: /etc/systemd/system/{{ item }}.d/override.conf
+    src: ./templates/{{ item }}.d/time_override.j2
+    force: yes
+  notify:
+    - "restart {{ item }} timer"
+  loop:
+    - apt-daily.timer
+    - apt-daily-upgrade.timer

@@ -65,6 +65,7 @@ For 6 and 7, the script is move to /usr/local/bin and we create a cron to allow 
 |auto_updates_start_update_time|Start time for download.|08:00:00|
 |auto_updates_random_update_time|Random time for download (in minutes).|50|
 |auto_updates_policy|Policy for upgrade (security or updates)|security|
+|auto_updates_install|Install auto-updates ?|true|
 
 ## Frequency details
 

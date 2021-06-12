@@ -33,8 +33,8 @@ You can basically use it by appending the role to your ansible project :
 ## Targets
 
 - Debian >= 9
-- Ubuntu >= 16
-- CentOS >= 6
+- Ubuntu >= 18
+- CentOS >= 7
 
 The targets are splitted in 3 groups:
 - `auto_updates_uat`
@@ -57,7 +57,7 @@ For 6 and 7, the script is move to /usr/local/bin and we create a cron to allow 
 
 | Variable           | Description| Default value |
 |--------------------|------------|---------------|
-|auto_updates_mail|Mail to send notification.|root|
+|auto_updates_mail|Mail to send notification.||
 |auto_updates_blacklisted_packages|List of blacklisted packages.|Disabled|
 |auto_updates_upgrade_frequency|Frequency of upgrades (monthly, weekly or daily).|monthly|
 |auto_updates_start_upgrade_time|Start time for upgrade.|09:00:00|

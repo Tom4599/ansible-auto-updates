@@ -8,26 +8,15 @@ update_cmd = security
 {% else %}
 update_cmd = default
 {% endif %}
-update_messages = yes
+update_messages = no
 download_updates = yes
-apply_updates = yes
-# Already in systemd timer
-random_sleep = 0
+apply_updates = no
+random_sleep = {{ auto_updates_random_update_time }}
 
-{% if auto_updates_mail == "" %}
 [emitters]
 emit_via =
-{% else %}
-[emitters]
-emit_via = email
 
-[email]
-email_from = root@{{ ansible_hostname }}
-email_to = {{ auto_updates_mail }}
-email_host = localhost
-{% endif %}
-
-[base]
 {% if auto_updates_blacklisted_packages|length > 0 %}
+[base]
 exclude={{ auto_updates_blacklisted_packages|join(' ') }}
 {% endif %}

@@ -1,0 +1,21 @@
+---
+
+- when: ansible_os_family == "Debian"
+  block:
+    - name: remove all files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/apt/apt.conf.d/20auto-upgrades
+        - /etc/apt/apt.conf.d/50unattended-upgrades
+        - /etc/systemd/system/apt-daily.timer.d/
+        - /etc/systemd/system/apt-daily-upgrade.timer.d/
+        - /etc/systemd/system/apt-daily-upgrade.service.d/
+      notify:
+        - "reload daemon"
+
+    - name: remove packages
+      package:
+        name: unattended-upgrades
+        state: absent

@@ -7,3 +7,5 @@ auto_updates_required_packages:
   - libselinux-python
 
 auto_updates_cron_path: "/etc/cron.daily/0yum.cron"
+
+auto_updates_yum_cron_bin_path: "/usr/local/bin/yum-cron"

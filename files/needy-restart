@@ -1,20 +1,24 @@
 #!/bin/bash
 
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+date=$(date +"%Y-%m-%d %T")
+
 procs=$(lsof | grep -v "/dev/zero\|\[aio\]" | perl -lane 'print $F[0] if ($F[3] =~ /DEL|deleted/ && ! $seen{$F[0]}++)')
 success=0
 
-if [[ -z "$procs" ]]; then
+if [ -z "$procs" ]; then
     restart_result="Nothing to restart"
 else
     services=$(ls /var/lock/subsys/ | grep "$procs")
-    if [[ -z "$services" ]]; then
+    if [ -z "$services" ]; then
         restart_result="Nothing to restart"
     else
         restart_result="Restarting services:"
         nfs_restarted="false"
         for p in ${services}; do
             # don't touch ntpdate, it ntpd
-            if [[ "$p" == "ntpdate" ]]; then
+            if [ "$p" == "ntpdate" ]; then
                 continue
             fi
             # rpc.*** means nfs
@@ -24,7 +28,7 @@ else
             fi
             restart_result="$restart_result\n  - $p"
             service_restart_result=$(service $p restart)
-            if [[ "$?" == "0" ]]; then
+            if [ "$?" == "0" ]; then
                 restart_result="$restart_result: ok"
             else
                 restart_result="$restart_result: error restarting $p:\n$service_restart_result"
@@ -35,8 +39,7 @@ else
 fi
 
 # Manage restart error
-echo -e "$restart_result"
-if [[ $success -ne 0 ]]; then
+echo -e "$date - $restart_result"
+if [ $success -ne 0 ]; then
     exit 1
 fi
-

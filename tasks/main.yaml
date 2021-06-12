@@ -7,22 +7,35 @@
         - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
         - '{{ ansible_os_family }}.yml'
       paths: '../vars'
+  tags:
+    - install
 
-- name: include env vars
-  include_vars: "{{ env }}.yml"
-  when: inventory_hostname in groups[env]
-  loop:
-    - auto_updates_preprod
-    - auto_updates_uat
-    - auto_updates_prod
-  loop_control:
-    loop_var: "env"
+- when: auto_updates_install
+  tags:
+    - install
+  block:
+  - name: include env vars
+    include_vars: "{{ env }}.yml"
+    when: inventory_hostname in groups[env]
+    loop:
+      - auto_updates_preprod
+      - auto_updates_uat
+      - auto_updates_prod
+    loop_control:
+      loop_var: "env"
 
-- name: install required packages
-  package:
-    name: "{{ item }}"
-    state: present
-  loop: "{{ auto_updates_required_packages }}"
+  - name: install required packages
+    package:
+      name: "{{ item }}"
+      state: present
+    loop: "{{ auto_updates_required_packages }}"
 
-- name: configure auto update by OS
-  include: configure-{{ ansible_os_family }}.yml
+  - name: configure auto update by OS
+    include: configure-{{ ansible_os_family }}.yml
+
+- when: not auto_updates_install
+  block:
+  - name: remove auto update by OS
+    include: remove-{{ ansible_os_family }}.yml
+  tags:
+    - remove

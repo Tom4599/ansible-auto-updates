@@ -20,14 +20,18 @@
   loop:
     - apt-daily.timer
     - apt-daily-upgrade.timer
+    - apt-daily-upgrade.service
 
-- name: deploy file to set execution time
-  template:
-    dest: /etc/systemd/system/{{ item }}.d/override.conf
-    src: ./templates/{{ item }}.d/time_override.j2
+- name: deploy timers
+  include_tasks: deploy_timers.yml
+  loop:
+    - { name: 'apt-daily.timer', timer: 'update.timer' }
+    - { name: 'apt-daily-upgrade.timer', timer: 'upgrade.timer' }
+
+- name: deploy apt-upgrade service
+  copy:
+    src: apt/service_systemd
+    dest: /etc/systemd/system/apt-daily-upgrade.service.d/override.conf
     force: yes
   notify:
-    - "restart {{ item }} timer"
-  loop:
-    - apt-daily.timer
-    - apt-daily-upgrade.timer
+    "reload daemon"

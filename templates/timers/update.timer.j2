@@ -1,0 +1,19 @@
+###
+##{{ ansible_managed }}
+###
+
+[Timer]
+OnCalendar=
+{% if auto_updates_upgrade_frequency == "monthly" %}
+{% if ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int == 16 %}
+OnCalendar={{ auto_updates_cron_week_day_string }} *-*-{{ auto_updates_cron_list_days }} {{ auto_updates_start_update_time }}
+{% else %}
+OnCalendar={{ auto_updates_cron_week_day_string }} *-*-{{ auto_updates_cron_min_day }}..{{ auto_updates_cron_max_day }} {{ auto_updates_start_update_time }}
+{% endif %}
+{% elif auto_updates_upgrade_frequency == "weekly" %}
+OnCalendar={{ auto_updates_cron_week_day_string }} *-*-* {{ auto_updates_start_update_time }}
+{% else %}
+OnCalendar={{ auto_updates_cron_days_daily_string }} *-*-* {{ auto_updates_start_update_time }}
+{% endif %}
+RandomizedDelaySec={{ auto_updates_random_update_time }}m
+Persistent=false

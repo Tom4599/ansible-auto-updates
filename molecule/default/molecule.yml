@@ -24,6 +24,14 @@ platforms:
     box: centos/6
     groups:
       - auto_updates_uat
+#  - name: debian9
+#    box: debian/stretch64
+#  - name: debian10
+#    box: debian/buster64
+#  - name: centos7
+#    box: centos/7
+#  - name: centos8
+#    box: centos/8
 provisioner:
   name: ansible
   inventory:

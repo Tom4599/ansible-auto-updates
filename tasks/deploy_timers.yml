@@ -1,0 +1,25 @@
+---
+
+- name: Check file to set execution time
+  template:
+    src: "templates/timers/{{ item.timer }}.j2"
+    dest: "/etc/systemd/system/{{ item.name }}.d/override.conf"
+    force: yes
+  check_mode: true
+  register: timer
+
+- when: timer.changed
+  block:
+  - name: "restart {{ item.name }} timer"
+    systemd:
+      name: "{{ item.name }}"
+      state: restarted
+      enabled: yes
+
+  - name: deploy file to set execution time
+    template:
+      src: "templates/timers/{{ item.timer }}.j2"
+      dest: "/etc/systemd/system/{{ item.name }}.d/override.conf"
+      force: yes
+    notify:
+      - reload daemon

@@ -1,28 +1,5 @@
 ---
 
-- name: restart apt-daily.timer timer
-  systemd:
-    name: apt-daily.timer
-    state: restarted
-    daemon_reload: yes
-
-- name: restart apt-daily-upgrade.timer timer
-  systemd:
-    name: apt-daily-upgrade.timer
-    state: restarted
-    daemon_reload: yes
-
-- name: restart yum-cron service
-  service:
-    name: yum-cron
-    state: restarted
-
-- name: restart dnf-automatic.timer service
-  systemd:
-    name: dnf-automatic.timer
-    state: restarted
-    daemon_reload: yes
-
 - name: reload daemon
   systemd:
     daemon_reload: yes

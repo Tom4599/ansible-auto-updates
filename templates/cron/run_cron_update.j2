@@ -1,0 +1,21 @@
+#!/bin/bash
+
+date=$(date +"%Y-%m-%d %T")
+
+{{ auto_updates_yum_cron_bin_path }} /etc/yum/yum-cron-update.conf >> /var/log/yumcron.log 2>&1
+
+if [ $? -eq 0 ]
+then
+  /usr/local/bin/needy-restart >> /var/log/yumcron.log 2>&1
+  if [ $? -eq 0 ]
+  then
+    echo "$date - OK (Update)" >> /var/log/yumcron.log
+    exit 0
+  else
+    echo "$date - ERROR during the restart task (Update)" >> /var/log/yumcron.log
+    exit 1
+  fi
+else
+  echo "$date - ERROR during the update task (Update)" >> /var/log/yumcron.log
+  exit 1
+fi

@@ -5,3 +5,5 @@ auto_updates_required_packages:
   - mailx
 
 auto_updates_cron_path: "/etc/cron.daily/0yum-daily.cron"
+
+auto_updates_yum_cron_bin_path: "/usr/sbin/yum-cron"

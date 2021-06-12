@@ -9,7 +9,11 @@ CHECK_ONLY=no
 CHECK_FIRST=no
 DOWNLOAD_ONLY=no
 RANDOMWAIT="{{ auto_updates_random_upgrade_time }}"
+{% if auto_updates_mail == "" %}
+MAILTO=
+{% else %}
 MAILTO={{ auto_updates_mail }}
+{% endif %}
 DAYS_OF_WEEK="1234" 
 CLEANDAY="0"
 SERVICE_WAITS=yes

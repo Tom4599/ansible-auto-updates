@@ -8,11 +8,19 @@ update_cmd = security
 {% else %}
 update_cmd = default
 {% endif %}
+{% if auto_updates_mail == "" %}
+update_messages = no
+{% else %}
 update_messages = yes
+{% endif %}
 download_updates = yes
 apply_updates = yes
 random_sleep = {{ auto_updates_random_upgrade_time }}
 
+{% if auto_updates_mail == "" %}
+[emitters]
+emit_via =
+{% else %}
 [emitters]
 emit_via = email
 
@@ -20,8 +28,9 @@ emit_via = email
 email_from = root@{{ ansible_hostname }}
 email_to = {{ auto_updates_mail }}
 email_host = localhost	
+{% endif %}
 
-[base]
 {% if auto_updates_blacklisted_packages|length > 0 %}
+[base]
 exclude={{ auto_updates_blacklisted_packages|join(' ') }}
 {% endif %}

@@ -2,62 +2,95 @@
 
 - name: deploy needy-restart script
   copy:
-    src: needy-restart
-    dest: /usr/local/bin/needy-restart
+    src: "{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
     mode: '755'
-
-## CentOS 6 ##
-- name: deploy yum-cron configuration
-  template:
-    dest: /etc/sysconfig/yum-cron
-    src: ./templates/sysconfig/yum-cron.j2
-    force: yes
-  notify:
-    - "restart yum-cron service"
-  when: "ansible_distribution_major_version == '6'"
+  loop:
+    - "needy-restart"
 
 ## CentOS 7 ##
-- name: "deploy yum-cron configuration"
-  template:
-    dest: /etc/yum/{{ item }}.conf
-    src: ./templates/yum/{{ item }}.conf.j2
-    force: yes
-  loop:
-    - yum-cron
-    - yum-cron-hourly
-  notify:
-    - "restart yum-cron service"
-  when: "ansible_distribution_major_version == '7'"
+- when: "ansible_distribution_major_version == '7'"
+  block:
+  - name: deploy yum-cron configuration (CentOS7)
+    template:
+      dest: /etc/yum/{{ item }}.conf
+      src: ./templates/yum/{{ item }}.conf.j2
+      force: yes
+    loop:
+      - yum-cron
+      - yum-cron-update
 
-# Tricks to set start time on CentOS 6 and CentOS7
-- block:
-    - name: check if yum-cron script exist
+  - name: disable official updates (CentOS7)
+    service:
+      name: yum-cron
+      state: stopped
+      enabled: no
+
+  - name: deploy run-cron scripts (CentOS7)
+    template:
+      dest: /usr/local/bin/{{ item }}
+      src: ./cron/{{ item }}.j2
+      force: yes
+      mode: '755'
+    loop:
+      - run_cron_update
+      - run_cron_upgrade
+
+  - name: create custom cron (CentOS7)
+    include: create_cron.yml
+
+## CentOS 6 ##
+- when: "ansible_distribution_major_version == '6'"
+  block:
+    - name: deploy yum-cron configuration (CentOS6)
+      template:
+        dest: /etc/sysconfig/yum-cron
+        src: ./templates/sysconfig/yum-cron.j2
+        force: yes
+
+    - name: check if yum-cron script exist (CentOS6)
       stat:
         path: /usr/local/bin/yum-cron
       register: script_path
 
-    - name: copy script for auto updates
-      copy:
-        src: "{{ auto_updates_cron_path }}"
-        dest: "/usr/local/bin/yum-cron"
-        mode: +x
-        remote_src: yes
-      when: not script_path.stat.exists
+    - when: not script_path.stat.exists
+      block:
+      - name: copy script for auto updates (CentOS6)
+        copy:
+          src: "{{ auto_updates_cron_path }}"
+          dest: "/usr/local/bin/yum-cron"
+          mode: +x
+          remote_src: yes
 
-    - name: add exit 0 in basic cron
-      copy:
-        content: |
-          #!/bin/bash
-          exit 0
-        dest: "{{ auto_updates_cron_path }}"
+      - name: Remove check (CentOS6)
+        replace:
+          path: "/usr/local/bin/yum-cron"
+          regexp: ^# Only run if this*[\s\S]*
+          before: "DAILYSCRIPT="
+          replace: ''
 
-    - name: create custom cron
+    - name: disable official updates (CentOS6)
+      service:
+        name: yum-cron
+        state: stopped
+        enabled: no
+
+    - name: deploy run-cron scripts (CentOS6)
+      template:
+        dest: /usr/local/bin/{{ item }}
+        src: ./cron/{{ item }}.j2
+        force: yes
+        mode: '755'
+      loop:
+        - run_cron_update
+        - run_cron_upgrade
+
+    - name: create custom cron (CentOS6)
       include: create_cron.yml
 
-  when: "ansible_distribution_major_version < '8'"
-
 ## CentOS 8 ##
-- block:
+- when: "ansible_distribution_major_version == '8'"
+  block:
     - name: deploy dnf-automatic configuration
       template:
         dest: /etc/dnf/automatic.conf
@@ -70,22 +103,20 @@
         state: directory
         mode: '0755'
       loop:
-        - /etc/systemd/system/dnf-automatic.timer.d/
-        - /etc/systemd/system/dnf-automatic.service.d/
+        - /etc/systemd/system/dnf-automatic-download.timer.d/
+        - /etc/systemd/system/dnf-automatic-install.timer.d/
+        - /etc/systemd/system/dnf-automatic-install.service.d/
 
-    - name: deploy dnf timer
-      template:
-        src: ./templates/dnf/timer_systemd.j2
-        dest: /etc/systemd/system/dnf-automatic.timer.d/override.conf
-        force: yes
-      notify:
-        "restart dnf-automatic.timer service"
+    - name: deploy dnf timers
+      include_tasks: deploy_timers.yml
+      loop:
+        - { name: 'dnf-automatic-download.timer', timer: 'update.timer' }
+        - { name: 'dnf-automatic-install.timer', timer: 'upgrade.timer' }
 
     - name: deploy dnf service
       copy:
         src: dnf/service_systemd
-        dest: /etc/systemd/system/dnf-automatic.service.d/override.conf
+        dest: /etc/systemd/system/dnf-automatic-install.service.d/override.conf
         force: yes
       notify:
         "reload daemon"
-  when: "ansible_distribution_major_version == '8'"

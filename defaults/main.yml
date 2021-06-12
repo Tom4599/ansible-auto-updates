@@ -1,6 +1,6 @@
 ---
 
-auto_updates_mail: root
+auto_updates_mail: ""
 
 auto_updates_blacklisted_packages: []
 
@@ -13,3 +13,5 @@ auto_updates_start_update_time: "08:00:00"
 auto_updates_random_update_time: 50
 
 auto_updates_policy: security
+
+auto_updates_install: true
